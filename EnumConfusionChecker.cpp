@@ -38,11 +38,9 @@ public:
         Expr *lhs = B->getLHS();
         Expr *rhs = B->getRHS();
 
-        QualType ltype = lhs->getType();
-        QualType rtype = rhs->getType();
+        QualType ltype = lhs->IgnoreCasts()->getType();
+        QualType rtype = rhs->IgnoreCasts()->getType();
 
-        std::cout << "LEFT IS ENUM: " << ltype->isEnumeralType() << std::endl; 
-        std::cout << "RIGHT IS ENUM: " << rtype->isEnumeralType() << std::endl; 
         if (!ltype.getTypePtr()->isEnumeralType() || !rtype.getTypePtr()->isEnumeralType()) {
             return;
         }
@@ -50,8 +48,6 @@ public:
         const EnumDecl *lED = ltype->castAs<EnumType>()->getDecl();
         const EnumDecl *rED = rtype->castAs<EnumType>()->getDecl();
 
-        std::cout << "LEFT: " << lED->getNameAsString() << std::endl;
-        std::cout << "RIGHT: " << rED->getNameAsString() << std::endl;
         bool match = lED->getNameAsString() == rED->getNameAsString();
 
         if (!match) {
