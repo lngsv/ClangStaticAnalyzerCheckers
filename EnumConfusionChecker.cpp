@@ -13,7 +13,6 @@
 //===----------------------------------------------------------------------===//
 
 
-#include <iostream>
 #include "clang/StaticAnalyzer/Checkers/BuiltinCheckerRegistration.h"
 #include "clang/StaticAnalyzer/Core/Checker.h"
 #include "clang/StaticAnalyzer/Core/PathSensitive/CheckerContext.h"
@@ -41,7 +40,7 @@ public:
         QualType ltype = lhs->IgnoreCasts()->getType();
         QualType rtype = rhs->IgnoreCasts()->getType();
 
-        if (!ltype.getTypePtr()->isEnumeralType() || !rtype.getTypePtr()->isEnumeralType()) {
+        if (!ltype->isEnumeralType() || !rtype->isEnumeralType()) {
             return;
         }
 
@@ -54,7 +53,7 @@ public:
             if (const ExplodedNode *N = C.generateNonFatalErrorNode()) {
                     if (!BT)
                         BT.reset(new BuiltinBug(this, "Enum confusion",
-                                "Enum variable has type different from "
+                                "Enum variable has a type different from "
                                 "the type of the value it is compared to"));
                 C.emitReport(std::make_unique<PathSensitiveBugReport>(*BT, BT->getDescription(), N));
             }
