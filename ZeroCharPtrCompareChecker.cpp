@@ -1,4 +1,4 @@
-//===-- ZeroCharPtrCompareChecker.cpp -----------------------------------------*- C++ -*--//
+//===-- ZeroCharPtrCompareChecker.cpp -----------------------------------------*- C -*--//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -6,13 +6,13 @@
 //
 //===----------------------------------------------------------------------===//
 //
-// Defines a checker for char pointer comparison.
-//     If a '\0' is compared to a variable or type 'char *', it may have been
+// Defines a checker for comparison between char pointer and null terminator.
+//     If a char pointer variable is compared to null terminator, it may have been
 //     written accidently and different behaviour is probably expected.
 //
 //===----------------------------------------------------------------------===//
 
- 
+
 #include "clang/StaticAnalyzer/Checkers/BuiltinCheckerRegistration.h"
 #include "clang/StaticAnalyzer/Core/Checker.h"
 #include "clang/StaticAnalyzer/Core/PathSensitive/CheckerContext.h"
@@ -34,29 +34,22 @@ public:
             return;
         }
 
-        Expr *lhs = B->getLHS();
-        Expr *rhs = B->getRHS();
+        Expr *lhs = B->getLHS()->IgnoreCasts();
+        Expr *rhs = B->getRHS()->IgnoreCasts();
 
         QualType ltype = lhs->getType();
-        QualType rtype = rhs->getType();
 
-        if (!ltype.getTypePtr()->isPointerType() || !rtype.getTypePtr()->isCharType()) {
+        if (!ltype->isPointerType() || !isa<CharacterLiteral>(rhs)) {
             return;
         }
 
-        //const EnumDecl *lED = ltype->castAs<EnumType>()->getDecl();
-        //const EnumDecl *rED = rtype->castAs<EnumType>()->getDecl();
-
-        //bool match = lED->getNameAsString() == rED->getNameAsString();
-
-        //if (!match) {
-            if (const ExplodedNode *N = C.generateNonFatalErrorNode()) {
-                    if (!BT)
-                        BT.reset(new BuiltinBug(this, "Zero char pointer comparison",
-                                "Zero is compared to char pointer variable"));
-                C.emitReport(std::make_unique<PathSensitiveBugReport>(*BT, BT->getDescription(), N));
-            }
-        //}
+        if (const ExplodedNode *N = C.generateNonFatalErrorNode()) {
+                if (!BT) {
+                    BT.reset(new BuiltinBug(this, "Zero char pointer comparison",
+                            "a char pointer is compared to the null terminator"));
+                }
+            C.emitReport(std::make_unique<PathSensitiveBugReport>(*BT, BT->getDescription(), N));
+        }
     }
 
 };

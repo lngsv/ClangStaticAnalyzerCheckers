@@ -34,11 +34,11 @@ public:
             return;
         }
 
-        Expr *lhs = B->getLHS();
-        Expr *rhs = B->getRHS();
+        Expr *lhs = B->getLHS()->IgnoreCasts();
+        Expr *rhs = B->getRHS()->IgnoreCasts();
 
-        QualType ltype = lhs->IgnoreCasts()->getType();
-        QualType rtype = rhs->IgnoreCasts()->getType();
+        QualType ltype = lhs->getType();
+        QualType rtype = rhs->getType();
 
         if (!ltype->isEnumeralType() || !rtype->isEnumeralType()) {
             return;
@@ -51,10 +51,10 @@ public:
 
         if (!match) {
             if (const ExplodedNode *N = C.generateNonFatalErrorNode()) {
-                    if (!BT)
+                    if (!BT) {
                         BT.reset(new BuiltinBug(this, "Enum confusion",
-                                "Enum variable has a type different from "
-                                "the type of the value it is compared to"));
+                                "compared expressions have different enum types"));
+                    }
                 C.emitReport(std::make_unique<PathSensitiveBugReport>(*BT, BT->getDescription(), N));
             }
         }

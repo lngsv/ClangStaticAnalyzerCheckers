@@ -1,4 +1,4 @@
-//===-- ZeroCharPtrAssignChecker.cpp -----------------------------------------*- C++ -*--//
+//===-- ZeroCharPtrAssignChecker.cpp -----------------------------------------*- C -*--//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -34,29 +34,22 @@ public:
             return;
         }
 
-        Expr *lhs = B->getLHS();
-        Expr *rhs = B->getRHS();
+        Expr *lhs = B->getLHS()->IgnoreCasts();
+        Expr *rhs = B->getRHS()->IgnoreCasts();
 
         QualType ltype = lhs->getType();
-        QualType rtype = rhs->getType();
 
-        if (!ltype.getTypePtr()->isPointerType() || !rtype.getTypePtr()->isCharType()) {
+        if (!ltype->isPointerType() || !isa<CharacterLiteral>(rhs)) {
             return;
         }
 
-        //const EnumDecl *lED = ltype->castAs<EnumType>()->getDecl();
-        //const EnumDecl *rED = rtype->castAs<EnumType>()->getDecl();
-
-        //bool match = lED->getNameAsString() == rED->getNameAsString();
-
-        //if (!match) {
-            if (const ExplodedNode *N = C.generateNonFatalErrorNode()) {
-                    if (!BT)
-                        BT.reset(new BuiltinBug(this, "Enum confusion",
-                                "Zero is assigned to char pointer variable"));
-                C.emitReport(std::make_unique<PathSensitiveBugReport>(*BT, BT->getDescription(), N));
-            }
-        //}
+        if (const ExplodedNode *N = C.generateNonFatalErrorNode()) {
+                if (!BT) {
+                    BT.reset(new BuiltinBug(this, "Zero char pointer assignment",
+                            "the null terminator is assigned to a char pointer variable"));
+                }
+            C.emitReport(std::make_unique<PathSensitiveBugReport>(*BT, BT->getDescription(), N));
+        }
     }
 
 };
