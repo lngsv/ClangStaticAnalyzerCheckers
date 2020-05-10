@@ -10,6 +10,8 @@ errno_t foo() {
     errno_t res2;
     res2 = memcpy_s();
 
+    if (memcpy_s() == 3) {}
+
     return memcpy_s();
 }
 
