@@ -70,16 +70,16 @@ public:
             return;
         }
 
-        SmallString<256> buf2;
-        llvm::raw_svector_ostream os2(buf2);
-        os2 << "The return value from the call to '" << *FD
+        SmallString<256> buf;
+        llvm::raw_svector_ostream os(buf);
+        os << "The return value from the call to '" << *FD
             << "' is not checked. As its type is errno_t, "
             << "you may have missed an error";
 
         PathDiagnosticLocation CELoc =
           PathDiagnosticLocation::createBegin(CE, BR.getSourceManager(), AC);
         BR.EmitBasicReport(AC->getDecl(), Checker, "Unchecked function result of errno type",
-                         "Security", os2.str(), CELoc,
+                         "ErrnoUncheckedFuncRes", os.str(), CELoc,
                          CE->getCallee()->getSourceRange());
     }
 };
