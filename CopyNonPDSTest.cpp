@@ -16,15 +16,15 @@ class Buffer {
 };
 
 void bar(Buffer& a) {
-    std::memset(&a, 0, sizeof(a));
+    std::memset(&a, 0, sizeof(a)); // предупреждение
 }
 
 void foo() {
     Buffer a, b;
-    std::memset(&a, 0, sizeof(a));
-    std::memchr(&a, 0, sizeof(a));
-    std::memcmp(&a, &b, sizeof(b));
-    std::memcpy(&a, &b, sizeof(b));
-    std::memmove(&a, &b, sizeof(b));
+    std::memset(&a, 0, sizeof(a)); // предупреждение
+    std::memchr(&a, 0, sizeof(a)); // предупреждение
+    std::memcmp(&a, &b, sizeof(b)); // предупреждение
+    std::memcpy(&a, &b, sizeof(b)); // предупреждение
+    std::memmove(&a, &b, sizeof(b)); // предупреждение
     bar(a);
 }
